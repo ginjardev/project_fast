@@ -89,9 +89,9 @@ def update_post(id:int, post:Post):
 		WHERE id = %s RETURNING *""", 
 		(post.title, post.content, post.published, str(id))
 	)
-	update_post = cursor.fetchone()
+	updated_post = cursor.fetchone()
 	conn.commit()
-	if update_post is None:
+	if updated_post is None:
 		raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-	return {"updated": update_post}
+	return {"updated": updated_post}
