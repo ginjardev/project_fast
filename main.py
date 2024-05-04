@@ -1,25 +1,18 @@
-from fastapi import FastAPI, Body, status, HTTPException, Response
+from fastapi import FastAPI, Body, status, HTTPException, Response, Depends
 from pydantic import BaseModel
 from typing import Optional
 from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
-from .models import Base
-from .database import engine, SessionLocal
+from models import Base
+from database import engine, get_db
+from sqlalchemy.orm import Session
 
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 while True:
@@ -39,6 +32,10 @@ class Post(BaseModel):
 	content: str
 	published: bool = True
 
+
+@app.get("/sqlalchemy")
+def get_them(db: Session = Depends(get_db)):
+	return {"status": "OK"}
 
 @app.get("/post")
 async def posts():
