@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Body, status, HTTPException, Response, Depends
 from schemas import PostCreate, Post
 from random import randrange
+from typing import List
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
@@ -15,10 +16,10 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-@app.get("/post")
+@app.get("/post", response_model=List[Post])
 async def posts(db: Session = Depends(get_db)):
-	all_posts = db.query(models.Post).all()
-	return all_posts
+    all_posts = db.query(models.Post).all()
+    return all_posts
 
 
 @app.post('/post', status_code=status.HTTP_201_CREATED, response_model=Post)
