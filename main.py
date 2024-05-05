@@ -8,6 +8,7 @@ import time
 from models import Base
 from database import engine, get_db
 from sqlalchemy.orm import Session
+import models
 
 
 Base.metadata.create_all(bind=engine)
@@ -33,17 +34,15 @@ class Post(BaseModel):
 	published: bool = True
 
 
-@app.get("/sqlalchemy")
-def get_them(db: Session = Depends(get_db)):
-	return {"status": "OK"}
-
 @app.get("/post")
-async def posts():
-	cursor.execute(
-		"""SELECT * FROM posts;"""
-	)
-	posts = cursor.fetchall()
-	return {"posts": posts}
+async def posts(db: Session = Depends(get_db)):
+    # cursor.execute(
+    # 	"""SELECT * FROM posts;"""
+    # )
+    # posts = cursor.fetchall()
+	all_posts = db.query(models.Post).all()
+	return {"posts": all_posts}
+
 
 @app.post('/post', status_code=status.HTTP_201_CREATED)
 def create_post(post:Post):
