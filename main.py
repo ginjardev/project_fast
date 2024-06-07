@@ -1,14 +1,14 @@
 from fastapi import FastAPI, Body, status, HTTPException, Response, Depends
-from schemas import PostCreate, Post
+from schemas import PostCreate, Post, UserCreate, UserOut
 from random import randrange
 from typing import List
 import psycopg2
 from psycopg2.extras import RealDictCursor
-import time
 from models import Base
 from database import engine, get_db
 from sqlalchemy.orm import Session
-import models
+import models, utils
+
 
 
 Base.metadata.create_all(bind=engine)
@@ -63,3 +63,14 @@ def update_post(id: int, post: PostCreate, db: Session = Depends(get_db)):
     post_query.update(post.model_dump(), synchronize_session=False)
     db.commit()
     return post_query.first()
+
+
+@app.post('/users', status_code=status.HTTP_201_CREATED, response_model=UserOut)
+def create_user(user: UserCreate, db: Session= Depends(get_db)):
+    hashed_password = utils.hash(user.password)
+    user.password = hashed_password
+    new_user = models.User(**user.model_dump())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
