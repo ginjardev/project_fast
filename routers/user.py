@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Body, status, HTTPException, Response, Depends, APIRouter
+from fastapi import status, HTTPException, Depends, APIRouter
 from schemas import UserCreate, UserOut
 from models import User
 from database import get_db
@@ -20,7 +20,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.get("/users{id}", status_code=status.HTTP_200_OK, response_model=UserOut)
+@router.get("/users/{id}", status_code=status.HTTP_200_OK, response_model=UserOut)
 def get_user(id:int, db: Session=Depends(get_db)):
     user = db.query(User).filter(User.id==id).first()
     if not user:
