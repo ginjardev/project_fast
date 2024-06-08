@@ -6,15 +6,18 @@ from sqlalchemy.orm import Session
 import models
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/posts",
+    tags=["posts"]
+)
 
-@router.get("/post", response_model=List[Post])
+@router.get("/", response_model=List[Post])
 async def posts(db: Session = Depends(get_db)):
     all_posts = db.query(models.Post).all()
     return all_posts
 
 
-@router.post("/post", status_code=status.HTTP_201_CREATED, response_model=Post)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=Post)
 def create_post(post: PostCreate, db: Session = Depends(get_db)):
     new_post = models.Post(**post.model_dump())
     db.add(new_post)
@@ -23,7 +26,7 @@ def create_post(post: PostCreate, db: Session = Depends(get_db)):
     return new_post
 
 
-@router.get("/posts/{id}", response_model=Post)
+@router.get("/{id}", response_model=Post)
 def get_post(id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
@@ -34,7 +37,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
     return post
 
 
-@router.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int, db: Session = Depends(get_db)):
     deleted_post = db.query(models.Post).filter(models.Post.id == id).first()
     if deleted_post is None:
@@ -49,7 +52,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.put("/posts/{id}", status_code=status.HTTP_202_ACCEPTED, response_model=Post)
+@router.put("/{id}", status_code=status.HTTP_202_ACCEPTED, response_model=Post)
 def update_post(id: int, post: PostCreate, db: Session = Depends(get_db)):
     post_query = db.query(models.Post).filter(models.Post.id == id)
     updated_post = post_query.first()
